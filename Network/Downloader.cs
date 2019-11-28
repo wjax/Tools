@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DataStructures.Basic;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using Tools.Base;
 
 namespace Tools.Network
 {
@@ -17,20 +18,43 @@ namespace Tools.Network
 
     public class Downloader
     {
+        #region logger
+        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        #endregion
+
+        public delegate void DownloadCompleteDelegate(string localFile);
+        public static event DownloadCompleteDelegate DownloadCompleteEvent;
+
         private static BlockingQueue<Download> downloadJobs = new BlockingQueue<Download>();
+        private static List<string> ongoingFiles = new List<string>();
         private static bool exit = false;
+
+        private static object lockOngoingFiles = new object();
 
         static Downloader()
         {
             Task.Run(() => RunningCallback());
         }
 
+        private static string BuildKey(string local, string remote)
+        {
+            return local + remote;
+        }
+
         public static void AddDownload(string local, string remote)
         {
-            downloadJobs.Enqueue(new Download() {
-                LocalPath = local,
-                RemoteUri = remote
-            });
+            lock (lockOngoingFiles)
+            {
+                if (!ongoingFiles.Contains(BuildKey(local, remote)))
+                {
+                    downloadJobs.Enqueue(new Download()
+                    {
+                        LocalPath = local,
+                        RemoteUri = remote
+                    });
+                    ongoingFiles.Add(BuildKey(local, remote));
+                }
+            }
         }
 
         private static void RunningCallback()
@@ -38,7 +62,13 @@ namespace Tools.Network
             while (!exit)
             {
                 Download job = downloadJobs.Dequeue();
-                Download(job.LocalPath, job.RemoteUri);
+                if (Download(job.LocalPath, job.RemoteUri))
+                    DownloadCompleteEvent?.Invoke(job.LocalPath);
+
+                lock (lockOngoingFiles)
+                {
+                    ongoingFiles.Remove(BuildKey(job.LocalPath, job.RemoteUri));
+                }
             }
         }
 
@@ -62,6 +92,7 @@ namespace Tools.Network
             }
             catch (Exception ex)
             {
+                logger.Warn($"Problem downloading file {remote}");
             }
             return false;
         }

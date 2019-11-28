@@ -58,6 +58,14 @@ namespace Tools
             return date;
         }
 
+        public static string dateAsStringWithPrecision(DateTime d)
+        {
+            string format = "dd-MM-yyyy HH:mm:ss.fff";
+            string date = d.ToString(format); ;
+
+            return date;
+        }
+
         public static DateTime GetTimeFromGps(int weeknumber, double seconds, bool useLEAP)
         {
             DateTime datum = new DateTime(1980, 1, 6, 0, 0, 0, DateTimeKind.Utc);
