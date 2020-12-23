@@ -17,5 +17,17 @@ namespace Tools
             while (newAngle > 180) newAngle -= 360;
             return newAngle;
         }
+        public static double ModuloAbs(double a, double n)
+        {
+            return (a % n + n) % n;
+        }
+
+        public static double DeltaAngles(double a, double b)
+        {
+            double diff = a - b;
+            diff = ModuloAbs((diff + 180), 360) - 180;
+
+            return -diff;
+        }
     }
 }
