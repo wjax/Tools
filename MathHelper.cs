@@ -8,8 +8,9 @@ namespace Tools
     {
         public static double WrapAngle360(double angle)
         {
-            return (angle + 360) % 360;
+            return ModuloAbs((angle + 360) , 360);
         }
+        
         public static double WrapAngle180(double angle)
         {
             double newAngle = angle;
@@ -17,6 +18,7 @@ namespace Tools
             while (newAngle > 180) newAngle -= 360;
             return newAngle;
         }
+
         public static double ModuloAbs(double a, double n)
         {
             return (a % n + n) % n;
