@@ -18,10 +18,6 @@ namespace Tools.Network
 
     public class Downloader
     {
-        #region logger
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        #endregion
-
         public delegate void DownloadCompleteDelegate(string localFile);
         public static event DownloadCompleteDelegate DownloadCompleteEvent;
 
@@ -92,7 +88,6 @@ namespace Tools.Network
             }
             catch (Exception ex)
             {
-                logger.Warn($"Problem downloading file {remote}");
             }
             return false;
         }

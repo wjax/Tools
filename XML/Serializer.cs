@@ -9,17 +9,8 @@ namespace Tools.XML
 {
     public static class Serializer
     {
-        #region logger
-        private static NLog.Logger logger = null;
-        #endregion
-
         static Serializer()
         {
-            try
-            {
-                logger = NLog.LogManager.GetCurrentClassLogger();
-            }
-            catch { }
         }
 
         public static T Deserialize<T>(string xml)
@@ -60,11 +51,9 @@ namespace Tools.XML
 
             } catch (XmlSchemaValidationException xmlE)
             {
-                logger?.Error(xmlE, $"Problem validating XML File {xmlFile}");
             }
             catch (Exception e)
             {
-                logger?.Error(e, $"Problem reading XML File {xmlFile}");
             }
 
             return returnType;
